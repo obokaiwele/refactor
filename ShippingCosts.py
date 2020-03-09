@@ -1,3 +1,20 @@
+from enum import Enum
+
+class City(Enum):
+    SEATTLE
+    SAN_FRANCISCO
+    LAS_VEGAS
+    LOS_ANGELES
+    DENVER
+    MINNEAPOLIS
+    SALLAS
+    CHICAGO
+    WASHINGTON_DC
+    BOSTON
+    NEW_YORK
+    MIAMI
+
+
 def dj(nodes, costs, start_node):
     """
     Dijkstra's algorithm for computing the minimum additive cost from a start node to all other nodes.
