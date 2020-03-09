@@ -1,4 +1,5 @@
 from enum import Enum
+import copy
 
 
 class City(Enum):
@@ -7,7 +8,7 @@ class City(Enum):
     LAS_VEGAS = 3
     LOS_ANGELES = 4
     DENVER = 5
-    MINNEAPOLIS = 5
+    MINNEAPOLIS = 6
     DALLAS = 7
     CHICAGO = 8
     WASHINGTON_DC = 9
@@ -34,15 +35,17 @@ mapping = {
 
 class Network(object):
     def __init__(self, distances):
-        self._distances = distances
+        self._distances = copy.deepcopy(distances)
         self._costs = self.one_way_costs()
-        self._two_way = self.two_way_network()
+        self._two_way_distances = self.two_way_distances()
+        self._two_way_costs = self.two_way_costs()
+        self._nodes = [city for city in City]
 
     def one_way_costs(self):
-        costs = self._distances.copy()
-        for k_outer, v_outer in self._distances.items():
+        costs = copy.deepcopy(self._distances)
+        for k_outer, v_outer in costs.items():
             for k_inner, v_inner in v_outer.items():
-                distance = self._distances[k_outer][k_inner]
+                distance = costs[k_outer][k_inner]
                 cost = 0
                 if distance > 2000:
                     cost += 0.002 * (distance - 2000) + 0.003 * 1000 + 0.004 * 500 + 0.005 * 500
@@ -55,8 +58,8 @@ class Network(object):
                 costs[k_outer][k_inner] = cost
         return costs
 
-    def two_way_network(self):
-        network = self._distances.copy()
+    def two_way_distances(self):
+        network = copy.deepcopy(self._distances)
         for k_outer, v_outer in self._distances.items():
             for k_inner, v_inner in v_outer.items():
                 if k_inner not in network:
@@ -64,6 +67,52 @@ class Network(object):
                 if k_inner not in network[k_inner].keys():
                     network[k_inner][k_outer] = v_inner
         return network
+
+    def two_way_costs(self):
+        network = copy.deepcopy(self._costs)
+        for k_outer, v_outer in self._distances.items():
+            for k_inner, v_inner in v_outer.items():
+                if k_inner not in network:
+                    network[k_inner] = {}
+                if k_inner not in network[k_inner].keys():
+                    network[k_inner][k_outer] = v_inner
+        return network
+
+
+    def dj(self, start_node, by_distance):
+        """
+        Dijkstra's algorithm for computing the minimum additive cost from a start node to all other nodes.
+        :param nodes: all unique nodes
+        :param costs: costs from one node to another
+        :param start_node: start node
+        :return: minimum additive cost from start node to all other nodes
+        """
+        unvisited_nodes = {node: None for node in self._nodes}
+        visited_nodes = {}
+        current_node = start_node
+        current_cost = 0
+        unvisited_nodes[current_node] = current_cost
+
+        costs = self._two_way_costs
+        if by_distance:
+            costs = self._two_way_distances
+
+        while True:
+            for neighbor, cost in costs[current_node].items():
+                if neighbor not in unvisited_nodes:
+                    continue
+                new_cost = current_cost + cost
+                if unvisited_nodes[neighbor] is None or new_cost < unvisited_nodes[neighbor]:
+                    unvisited_nodes[neighbor] = new_cost
+            visited_nodes[current_node] = current_cost
+            del unvisited_nodes[current_node]
+            if not unvisited_nodes:
+                break
+            candidates = [node for node in unvisited_nodes.items() if node[1]]
+
+            # we need the maximum, so sort from largest to smallest
+            current_node, current_cost = sorted(candidates, key=lambda x: x[1], reverse=False)[0]
+        return visited_nodes
 
 
 
@@ -166,7 +215,7 @@ def driver():
         print(f'{start_city} : {city_nodes[k]} = {round(v, 4)}')
 
 
-if __name__ == '__main__':
+def main():
     distances = {
         City.SEATTLE: {
             City.SAN_FRANCISCO: 1306,
@@ -211,7 +260,22 @@ if __name__ == '__main__':
         },
     }
 
+    print('\n\n')
+    by_distance = input('Computing by (type 0 for distance or 1 for costs)? ')
+
+    network = Network(distances)
+
+    start_city = input('What is the start city? ')
+
+    start_node = mapping[start_city]
+
+    paths = network.dj(start_node, by_distance)
+
+    for k, v in paths.items():
+        print(f'{start_city} : {k.name} = {round(v, 4)}')
 
 
 
-    driver()
+if __name__ == '__main__':
+    # driver()
+    main()
