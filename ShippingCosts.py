@@ -2,18 +2,69 @@ from enum import Enum
 
 
 class City(Enum):
-    SEATTLE
-    SAN_FRANCISCO
-    LAS_VEGAS
-    LOS_ANGELES
-    DENVER
-    MINNEAPOLIS
-    DALLAS
-    CHICAGO
-    WASHINGTON_DC
-    BOSTON
-    NEW_YORK
-    MIAMI
+    SEATTLE = 1
+    SAN_FRANCISCO = 2
+    LAS_VEGAS = 3
+    LOS_ANGELES = 4
+    DENVER = 5
+    MINNEAPOLIS = 5
+    DALLAS = 7
+    CHICAGO = 8
+    WASHINGTON_DC = 9
+    BOSTON = 10
+    NEW_YORK = 11
+    MIAMI = 12
+
+
+mapping = {
+    'Seattle': City.SEATTLE,
+    'San Francisco': City.SAN_FRANCISCO,
+    'Las Vegas': City.LAS_VEGAS,
+    'Los Angeles': City.LOS_ANGELES,
+    'Denver': City.DENVER,
+    'Minneapolis': City.MINNEAPOLIS,
+    'Dallas': City.DALLAS,
+    'Chicago': City.CHICAGO,
+    'Washington D.C.': City.WASHINGTON_DC,
+    'Boston': City.BOSTON,
+    'New York': City.NEW_YORK,
+    'Miami': City.MIAMI,
+}
+
+
+class Network(object):
+    def __init__(self, distances):
+        self._distances = distances
+        self._costs = self.one_way_costs()
+        self._two_way = self.two_way_network()
+
+    def one_way_costs(self):
+        costs = self._distances.copy()
+        for k_outer, v_outer in self._distances.items():
+            for k_inner, v_inner in v_outer.items():
+                distance = self._distances[k_outer][k_inner]
+                cost = 0
+                if distance > 2000:
+                    cost += 0.002 * (distance - 2000) + 0.003 * 1000 + 0.004 * 500 + 0.005 * 500
+                elif distance > 1000:
+                    cost += 0.003 * (distance - 1000) + 0.004 * 500 + 0.005 * 500
+                elif distance > 500:
+                    cost += 0.004 * (distance - 500) + 0.005 * 500
+                else:
+                    cost += 0.005 * distance
+                costs[k_outer][k_inner] = cost
+        return costs
+
+    def two_way_network(self):
+        network = self._distances.copy()
+        for k_outer, v_outer in self._distances.items():
+            for k_inner, v_inner in v_outer.items():
+                if k_inner not in network:
+                    network[k_inner] = {}
+                if k_inner not in network[k_inner].keys():
+                    network[k_inner][k_outer] = v_inner
+        return network
+
 
 
 def dj(nodes, costs, start_node):
