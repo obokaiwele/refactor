@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class City(Enum):
     SEATTLE
     SAN_FRANCISCO
@@ -7,7 +8,7 @@ class City(Enum):
     LOS_ANGELES
     DENVER
     MINNEAPOLIS
-    SALLAS
+    DALLAS
     CHICAGO
     WASHINGTON_DC
     BOSTON
@@ -115,4 +116,51 @@ def driver():
 
 
 if __name__ == '__main__':
+    distances = {
+        City.SEATTLE: {
+            City.SAN_FRANCISCO: 1306,
+            City.DENVER: 2161,
+            City.MINNEAPOLIS: 2661,
+        },
+        City.SAN_FRANCISCO: {
+            City.LAS_VEGAS: 919,
+            City.LOS_ANGELES: 629,
+        },
+        City.LAS_VEGAS: {
+            City.LOS_ANGELES: 435,
+            City.DENVER: 1225,
+            City.DALLAS: 1983,
+        },
+        City.DENVER: {
+            City.MINNEAPOLIS: 1483,
+            City.DALLAS: 1258,
+        },
+        City.MINNEAPOLIS: {
+            City.DALLAS: 1532,
+            City.CHICAGO: 661,
+        },
+        City.DALLAS: {
+            City.WASHINGTON_DC: 2113,
+            City.MIAMI: 2161,
+        },
+        City.CHICAGO: {
+            City.WASHINGTON_DC: 1145,
+            City.BOSTON: 1613,
+        },
+        City.WASHINGTON_DC: {
+            City.BOSTON: 725,
+            City.NEW_YORK: 383,
+            City.MIAMI: 1709,
+        },
+        City.BOSTON: {
+            City.NEW_YORK: 338,
+        },
+        City.NEW_YORK: {
+            City.MIAMI: 2145,
+        },
+    }
+
+
+
+
     driver()
